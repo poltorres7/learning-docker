@@ -121,7 +121,50 @@ Ejecuta paso 3
 
 ---------
 
+## Práctica 3
+
+Crea 2 redes:
+
+- public
+- data
+
+1. En la red de `public` crea un container de base de datos
+
+```bash
+docker run --name some-mysql \
+  --network data \
+  -e MYSQL_ROOT_PASSWORD=my-secret-pw \
+  -d mysql:latest
+```
+
+2. En la red `public` crea un container de wordpress con los datos de conexión del container mysql creado en el paso anterior
+
+```bash
+docker run --name some-wordpress \
+  --network public \
+  --restart always \
+  -e WORDPRESS_DB_HOST=172.19.0.2 \
+  -e WORDPRESS_DB_USER=root \
+  -e WORDPRESS_DB_PASSWORD=my-secret-pw \
+  -e WORDPRESS_DB_NAME=wp \
+  -p 8080:80 -d wordpress 
+```
+
+Modify iptables
+
+```bash
+## public
+br-6cee27a8696a 172.18.0.1/16
+
+## data
+br-cfb22152d5c8 172.19.0.1/16
+
+## example
+sudo iptables -I DOCKER-USER -i br-########1 -o br-########2 -j ACCEPT
+sudo iptables -I DOCKER-USER -i br-########2 -o br-########1 -j ACCEPT
 
 
+sudo iptables -I DOCKER-USER -i br-6cee27a8696a -o br-cfb22152d5c8 -j ACCEPT
+sudo iptables -I DOCKER-USER -i br-cfb22152d5c8 -o br-6cee27a8696a -j ACCEPT
 
-
+```
