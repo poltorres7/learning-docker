@@ -147,10 +147,11 @@ docker run --name some-wordpress \
   -e WORDPRESS_DB_USER=root \
   -e WORDPRESS_DB_PASSWORD=my-secret-pw \
   -e WORDPRESS_DB_NAME=wp \
-  -p 8080:80 -d wordpress 
+  -d wordpress 
+#  -p 8080:80 -d wordpress 
 ```
 
-Modify iptables
+### Modify iptables
 
 ```bash
 ## public
@@ -166,5 +167,18 @@ sudo iptables -I DOCKER-USER -i br-########2 -o br-########1 -j ACCEPT
 
 sudo iptables -I DOCKER-USER -i br-6cee27a8696a -o br-cfb22152d5c8 -j ACCEPT
 sudo iptables -I DOCKER-USER -i br-cfb22152d5c8 -o br-6cee27a8696a -j ACCEPT
+
+
+sudo route -n delete -net 172.18.0.0/16 192.168.0.1
+
+sudo route -n add 172.18.0.0/16 192.168.106.2
+
+
+sudo iptables -A FORWARD -i col0 -o br-6cee27a8696a -p tcp --dport 80 -j ACCEPT
+sudo iptables -A FORWARD -i br-6cee27a8696a -o col0 -p tcp --sport 80 -j ACCEPT
+
+sudo iptables -A FORWARD -i col0 -o br-6cee27a8696a -j ACCEPT
+sudo iptables -A FORWARD -i br-6cee27a8696a -o col0 -j ACCEPT
+
 
 ```
